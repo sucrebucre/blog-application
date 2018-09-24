@@ -1,0 +1,5 @@
+/node_modules
+.env
+blog-application.pdf
+sequelize_promise_understanding.js
+app.js
