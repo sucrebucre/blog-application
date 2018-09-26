@@ -2,11 +2,19 @@
 require('dotenv').config();
 
 const express = require('express');
+const session = require('express-session');
 const bodyparser = require('body-parser');
 const Sequelize = require('sequelize');
 
 //start node express
 const app = express();
+
+//initiate a session
+app.use(session({
+	secret: 'test',
+	resave: false,
+	saveUninitialized: false
+}));
 
 //set view enging to "ejs"
 app.set('view engine', 'ejs');
@@ -61,6 +69,9 @@ Comments.belongsTo(Posts);
 Comments.belongsTo(Users);
 
 app.get('/posts', function(request, response) {
+
+    //console.log(request.session)
+
     Posts.findAll({
     })
     .then(function(result) {
@@ -71,7 +82,12 @@ app.get('/posts', function(request, response) {
         return array;
     })
     .then((result_array) => {
-      response.render('posts', {data: result_array});
+
+			//initiate the session and console.log it 
+      request.session.user = result_array;
+      console.log(request.session.user);
+
+			response.render('posts', {data: result_array});
     })
 });
 
@@ -108,6 +124,8 @@ app.get('/:user_name/posts', function(request, response) {
 });
 
 app.get('/post/:post_id', function(request, response) {
+    console.log(request.session.user);
+
     Posts.findOne({
       where: {
         post_id: request.params.post_id
