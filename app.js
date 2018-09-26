@@ -121,6 +121,30 @@ app.get('/post/:post_id', function(request, response) {
     })
 });
 
+app.get('/create-post', function(request, response) {
+  response.render('create-post')
+})
+
+app.post('/create-post', urlencodedParser, function (request, response) {
+
+  	Posts.create({
+      userUserId: 1,
+  		post_title: request.body.title,
+  		post_body: request.body.body
+  	})
+    .then(generated_post => {
+        response.redirect(`/post/${generated_post.post_id}`)
+    })
+
+});
+
+app.post('/add-comment', urlencodedParser, function (request, response) {
+    console.log(request.body);
+});
+
+//Sync the database
+sequelize.sync()
+
 //start listening
 app.listen(3000, function(){
   console.log('Server is running on port 3000');

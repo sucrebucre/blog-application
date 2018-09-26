@@ -9,6 +9,17 @@
 
 <% for(var i = 0 ; i < data.length ; i++) { %>
   <p><%= data[i] %></p>
+
+
+
+  <h1>Comment</h1>
+
+  <form id="messages" action="/add-comment" method="POST">
+    <textarea rows="4" cols="50" name="body" type="text" placeholder="Message"></textarea><br>
+    <input type="submit" value="Submit">
+  </form>
+
+
   <hr>
 <% } %>
 
