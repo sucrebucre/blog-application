@@ -68,97 +68,160 @@ Posts.hasMany(Comments);
 Comments.belongsTo(Posts);
 Comments.belongsTo(Users);
 
+app.post('/login', urlencodedParser, function (request, response) {
+
+	if(request.body.email.length === 0) {
+		response.redirect('/?message=' + encodeURIComponent("Please fill out your email address."));
+		return;
+	}
+
+	if(request.body.password.length === 0) {
+		response.redirect('/?message=' + encodeURIComponent("Please fill out your password."));
+		return;
+	}
+	var email = request.body.email
+	var password = request.body.password
+
+	Users.findOne({
+		where: {
+			email: email
+		}
+	})
+	.then(function (users) {
+		if (users !== null && password === users.password) {
+			request.session.user = users;
+			response.redirect('/posts');
+		} else {
+			response.redirect('/login');
+		}
+	})
+	.catch(function (error) {
+		console.error(error)
+	})
+});
+
+app.get('/login', function(request, response) {
+	response.render('login')
+})
+
+app.post('/register', urlencodedParser, function(request, response){
+
+	Users.create({
+		user_name: request.body.user_name,
+		email: request.body.email,
+		password: request.body.password
+	})
+	.then(generated_user => {
+			response.redirect('/login')
+	})
+
+})
+
+app.get('/register', function(request, response){
+	response.render('register')
+})
+
 app.get('/posts', function(request, response) {
 
-    //console.log(request.session)
-
-    Posts.findAll({
-    })
-    .then(function(result) {
-        array = [];
-        for(i=0;i<result.length;i++){
-          array.push(result[i].dataValues.post_body);
-        }
-        return array;
-    })
-    .then((result_array) => {
-
-			//initiate the session and console.log it 
-      request.session.user = result_array;
-      console.log(request.session.user);
-
-			response.render('posts', {data: result_array});
-    })
+		const user = request.session.user;
+		if (user === undefined) {
+		response.redirect('/login');
+		} else {
+	    Posts.findAll({
+	    })
+	    .then((result_array) => {
+				response.render('posts', {data: result_array, user_info: user});
+	    })
+		}
 });
 
 app.get('/:user_name/posts', function(request, response) {
-  Users.findOne({
-    where: {
-      user_name: request.params.user_name
-    }
-  })
-  .then(function(result) {
-    return result.dataValues.user_id;
-  })
-  .then(function(user_id) {
+	const user = request.session.user;
+	if (user === undefined) {
+	response.redirect('/login');
+	} else {
+	  Users.findOne({
+	    where: {
+	      user_name: request.params.user_name
+	    }
+	  })
+	  .then(function(result) {
+	    return result.dataValues.user_id;
+	  })
+	  .then(function(user_id) {
 
-    Posts.findAll({
-    	where: {
-    		userUserId: user_id
-    	}
-    })
-    .then(function(result_by_id) {
+	    Posts.findAll({
+	    	where: {
+	    		userUserId: user_id
+	    	}
+	    })
+	    .then(function(result_by_id) {
+	      response.render('posts-specific-user', {data: result_by_id, user_info: user});
+	    })
 
-        array = [];
-
-        for(i=0;i<result_by_id.length;i++){
-          array.push(result_by_id[i].dataValues.post_body);
-        }
-
-        return array;
-    })
-    .then((result_array) => {
-      response.render('posts', {data: result_array});
-    })
-  })
+	  })
+	}
 });
 
 app.get('/post/:post_id', function(request, response) {
-    console.log(request.session.user);
 
-    Posts.findOne({
-      where: {
-        post_id: request.params.post_id
-      }
-    })
-    .then(function(result) {
-        response.render('single-post', {data: result.dataValues.post_body});
-    })
-    .catch(function(error) {
-        response.render('single-post', {data: "This post id does not exist. Try another one!"});
-    })
+		const user = request.session.user;
+		if (user === undefined) {
+		response.redirect('/login');
+		} else {
+	    Posts.findOne({
+	      where: {
+	        post_id: request.params.post_id
+	      }
+	    })
+	    .then(function(result) {
+	        response.render('single-post', {data: result});
+	    })
+	    .catch(function(error) {
+	        response.render('single-post', {data: "This post id does not exist. Try another one!"});
+	    })
+		}
 });
 
 app.get('/create-post', function(request, response) {
-  response.render('create-post')
+	const user = request.session.user;
+	if (user === undefined) {
+	response.redirect('/login');
+	} else {
+	  response.render('create-post')
+	}
 })
 
 app.post('/create-post', urlencodedParser, function (request, response) {
-
-  	Posts.create({
-      userUserId: 1,
-  		post_title: request.body.title,
-  		post_body: request.body.body
-  	})
-    .then(generated_post => {
-        response.redirect(`/post/${generated_post.post_id}`)
-    })
+		const user = request.session.user;
+		if (user === undefined) {
+		response.redirect('/login');
+		} else {
+			console.log(user);
+	  	Posts.create({
+	      userUserId: user.user_id,
+	  		post_title: request.body.title,
+	  		post_body: request.body.body
+	  	})
+	    .then(generated_post => {
+	        response.redirect(`/post/${generated_post.post_id}`)
+	    })
+		}
 
 });
 
 app.post('/add-comment', urlencodedParser, function (request, response) {
     console.log(request.body);
 });
+
+app.get('/logout', (req,res)=>{
+  req.session.destroy((error) => {
+		if(error) {
+			throw error;
+		}
+		res.redirect('/login');
+	})
+})
 
 //Sync the database
 sequelize.sync()
