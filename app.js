@@ -169,17 +169,32 @@ app.get('/post/:post_id', function(request, response) {
 		if (user === undefined) {
 		response.redirect('/login');
 		} else {
+
 	    Posts.findOne({
 	      where: {
 	        post_id: request.params.post_id
 	      }
 	    })
 	    .then(function(result) {
-	        response.render('single-post', {data: result});
+
+				//let comment_retriever;
+
+				Comments.findAll({
+		      where: {
+		        postPostId: request.params.post_id
+		      }
+		    })
+				.then(function(comment_info){
+					console.log(comment_info);
+					console.log(result);
+					response.render('single-post', {data: result, comments: comment_info});
+				})
+
 	    })
 	    .catch(function(error) {
 	        response.render('single-post', {data: "This post id does not exist. Try another one!"});
 	    })
+
 		}
 });
 
@@ -211,7 +226,22 @@ app.post('/create-post', urlencodedParser, function (request, response) {
 });
 
 app.post('/add-comment', urlencodedParser, function (request, response) {
-    console.log(request.body);
+
+		const user = request.session.user;
+		if (user === undefined) {
+		response.redirect('/login');
+		} else {
+	  	Comments.create({
+	      userUserId: user.user_id,
+				postPostId: request.body.post_id,
+	  		comment_body: request.body.body
+	  	})
+	    .then(generated_comment => {
+				console.log(generated_comment);
+	        response.redirect(`/post/${generated_comment.postPostId}`)
+	    })
+		}
+
 });
 
 app.get('/logout', (req,res)=>{

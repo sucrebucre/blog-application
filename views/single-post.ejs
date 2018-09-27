@@ -8,10 +8,18 @@
 <body>
 <a href="/logout">Log out</a>
 
-  <h1><%= data.dataValues.post_body %></h1>
+  <h1><%= data.dataValues.post_title %></h1>
   <p><%= data.dataValues.post_body %></p>
 
-  <h1>Comment</h1>
+  <h1>Comments</h1>
+  <ul>
+
+    <% for(let i = 0 ; i < comments.length ; i++) { %>
+    <li><%= comments[i].dataValues.comment_body %></li>
+    <% } %>
+  </ul>
+
+  <h1>Be part of the discussion</h1>
 
   <form id="messages" action="/add-comment" method="POST">
     <textarea rows="4" cols="50" name="body" type="text" placeholder="Message"></textarea><br>

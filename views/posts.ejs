@@ -8,7 +8,7 @@
 <body>
 <a href="/logout">Log out</a>
 
-<p>Hey <%= user_info.user_name %> here you see an overview of all the recent posts on B.Blog</p>
+<p>Hey <%= user_info.user_name %>, here you see an overview of all the recent posts on B.Blog</p>
 
 <!-- <a href="/create-post">Create Post</a>
 <a href="/aloha/posts">View your own Post</a> -->
@@ -18,11 +18,13 @@
 
   <h1><%= data[i].dataValues.post_title %></h1>
   <p><%= data[i].dataValues.post_body %></p>
+  <p><%= data[i].dataValues.post_id %></p>
 
   <h3>Comment</h3>
 
   <form id="messages" action="/add-comment" method="POST">
     <textarea rows="4" cols="50" name="body" type="text" placeholder="Message"></textarea><br>
+    <textarea rows="1" cols="10" name="post_id" type="text" placeholder="Post ID"></textarea><br>
     <input type="submit" value="Submit">
   </form>
 
