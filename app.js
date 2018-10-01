@@ -16,6 +16,8 @@ app.use(session({
 	saveUninitialized: false
 }));
 
+app.use('/static', express.static('static'))
+
 //set view enging to "ejs"
 app.set('view engine', 'ejs');
 
@@ -231,6 +233,7 @@ app.post('/add-comment', urlencodedParser, function (request, response) {
 		if (user === undefined) {
 		response.redirect('/login');
 		} else {
+			console.log("Info from body-parser:" + request.body)
 	  	Comments.create({
 	      userUserId: user.user_id,
 				postPostId: request.body.post_id,

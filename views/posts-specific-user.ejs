@@ -10,30 +10,13 @@
 
 <p>Hey <%= user_info.user_name %> here you see an overview of all the recent of ... </p>
 
-<!-- <a href="/create-post">Create Post</a>
-<a href="/aloha/posts">View your own Post</a> -->
-
 <% for(let i = 0 ; i < data.length ; i++) { %>
-
-
   <h1><%= data[i].dataValues.post_title %></h1>
   <p><%= data[i].dataValues.post_body %></p>
-
-  <h3>Comment</h3>
-
-  <form id="messages" action="/add-comment" method="POST">
-    <textarea rows="4" cols="50" name="body" type="text" placeholder="Message"></textarea><br>
-    <input type="submit" value="Submit">
-  </form>
-
-
+  <a href="/post/<%= data[i].dataValues.post_id %>">See comments</a>
   <hr>
 <% } %>
 
 </body>
-
-<script>
-// Cookies.set('name', 'value', { expires: 7 });
-</script>
 
 </html>

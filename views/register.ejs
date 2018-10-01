@@ -3,20 +3,58 @@
 <head>
 <meta charset="UTF-8">
 <title>Register</title>
+<link href="//maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
+<script src="//maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<link rel="stylesheet" type="text/css" href="/static/style.css"/>
 </head>
 
 <body>
 
-<h1>Register your account</h1>
+  <div class="container">
 
-<form id="register" action="/register" method="POST">
-  User name: <input type="text" name="user_name"><br>
-  Email: <input type="text" name="email"><br>
-  Password: <input type="text" name="password"><br>
-  <input type="submit" value="Register">
-</form>
+    <div class="row">
 
-<p>Do you have an account yet? <a href="/login">Login</a> directly!</p>
+      <div class="col-sm-9 col-md-7 col-lg-5 mx-auto">
+
+        <div class="card card-signin my-5">
+
+          <div class="card-body">
+
+            <h5 class="card-title text-center">Register</h5>
+
+            <form class="form-signin" action="/register" method="POST">
+
+              <div class="form-label-group">
+                <input type="text" id="inputUsername" class="form-control" placeholder="Username" name="user_name"  required autofocus>
+                <label for="inputUsername">Username</label>
+              </div>
+
+              <div class="form-label-group">
+                <input type="text" id="inputEmail" class="form-control" placeholder="Email" name="email" required>
+                <label for="inputEmail">Email</label>
+              </div>
+
+              <div class="form-label-group">
+                <input type="text" id="inputPassword" class="form-control" placeholder="password" name="password" required>
+                <label for="inputPassword">Password</label>
+              </div>
+
+              <button class="btn btn-lg btn-primary btn-block text-uppercase" type="submit">Register</button>
+
+            </form>
+
+            <a href="/login" class="register">Login account</a>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
 
 </body>
 
