@@ -267,6 +267,20 @@ app.get('/logout', (req,res)=>{
 	})
 })
 
+app.get('/error', function(req, res) {
+    res.render('error');
+});
+
+app.get('/', function(req, res) {
+    res.redirect('/login');
+});
+
+app.get('*', function(req, res) {
+    res.redirect('/error');
+});
+
+
+
 //Sync the database
 sequelize.sync()
 
