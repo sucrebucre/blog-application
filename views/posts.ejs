@@ -8,7 +8,11 @@
 <body>
 <a href="/logout">Log out</a>
 
-<p>Hey <%= user_info.user_name %> here you see an overview of all the recent posts on B.Blog</p>
+<p>Hey <%= user_info.user_name %>, these are the actions you can take:</p>
+<ul>
+  <li><a href="/create-post">Create post</a></li>
+  <li><a href="/<%= user_info.user_name %>/posts">An overview of all your posts</a></li>
+</ul>
 
 <% for(let i = 0 ; i < data.length ; i++) { %>
   <h1><%= data[i].dataValues.post_title %></h1>

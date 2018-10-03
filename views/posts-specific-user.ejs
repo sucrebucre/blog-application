@@ -8,7 +8,7 @@
 <body>
 <a href="/logout">Log out</a>
 
-<p>Hey <%= user_info.user_name %> here you see an overview of all the recent of ... </p>
+<h1>All <%= user_info.user_name %>'s posts</h1>
 
 <% for(let i = 0 ; i < data.length ; i++) { %>
   <h1><%= data[i].dataValues.post_title %></h1>

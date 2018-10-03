@@ -36,7 +36,7 @@ const Posts = sequelize.define('posts', {
     autoIncrement: true
   },
 	post_title: Sequelize.STRING,
-  post_body: Sequelize.STRING
+  post_body: Sequelize.TEXT
 });
 
 const Comments = sequelize.define('comments', {
@@ -45,7 +45,7 @@ const Comments = sequelize.define('comments', {
     primaryKey: true,
     autoIncrement: true
   },
-	comment_body: Sequelize.STRING
+	comment_body: Sequelize.TEXT
 });
 
 //Setting relations of the database
