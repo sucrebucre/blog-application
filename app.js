@@ -5,6 +5,7 @@ const express = require('express');
 const session = require('express-session');
 const bodyparser = require('body-parser');
 const bcrypt = require('bcrypt');
+const alert = require('alert-node');
 const Sequelize = require('sequelize');
 
 
@@ -117,17 +118,49 @@ app.get('/login', function(request, response) {
 app.post('/register', urlencodedParser, function(request, response){
 
 	let password = request.body.password;
-	bcrypt.hash(password, 8).then(function(hash) {
-			Users.create({
-				user_name: request.body.user_name,
-				email: request.body.email,
-				password: hash
-			})
-	})
-	.then(generated_user => {
-			response.redirect('/login')
-	})
+	let password_check = request.body.password_check;
 
+	if(request.body.user_name === "" || request.body.email === "" || request.body.password === "" || request.body.password_check === ""){
+			response.redirect('/register');
+			alert('Please fill in every field. Retry!');
+	} else if (password.length < 8 ){
+			alert('Password needs to have at least 8 characters. Retry!');
+			response.redirect('/register')
+	} else if(password != password_check ){
+			alert ('Passwords do not correspond. Retry!');
+			response.redirect('/register')
+	} else if(password.length < 8 && password != password_check ){
+			alert ('Passwords do not correspond and need to be at least 8 characters. Retry!');
+			response.redirect('/register')
+	}
+	 else {
+		Users.findOne({
+			where: {
+				user_name: request.body.user_name
+			}
+		})
+		.then(result => {
+			if (result === null){
+				bcrypt.hash(password, 8).then(function(hash) {
+						Users.create({
+							user_name: request.body.user_name,
+							email: request.body.email,
+							password: hash
+						})
+				})
+				.then(generated_user => {
+						response.redirect('/login')
+				})
+			} else {
+				response.redirect('/already-exists')
+			}
+		})
+	}
+
+})
+
+app.get('/already-exists', function(request, response) {
+	response.render('already-exists')
 })
 
 app.get('/register', function(request, response){
@@ -137,6 +170,7 @@ app.get('/register', function(request, response){
 app.get('/posts', function(request, response) {
 
 		const user = request.session.user;
+
 		if (user === undefined) {
 		response.redirect('/login');
 		} else {
@@ -190,16 +224,12 @@ app.get('/post/:post_id', function(request, response) {
 	    })
 	    .then(function(result) {
 
-				//let comment_retriever;
-
 				Comments.findAll({
 		      where: {
 		        postPostId: request.params.post_id
 		      }
 		    })
 				.then(function(comment_info){
-					console.log(comment_info);
-					console.log(result);
 					response.render('single-post', {data: result, comments: comment_info});
 				})
 
@@ -225,7 +255,6 @@ app.post('/create-post', urlencodedParser, function (request, response) {
 		if (user === undefined) {
 		response.redirect('/login');
 		} else {
-			console.log(user);
 	  	Posts.create({
 	      userUserId: user.user_id,
 	  		post_title: request.body.title,
@@ -244,14 +273,12 @@ app.post('/add-comment', urlencodedParser, function (request, response) {
 		if (user === undefined) {
 		response.redirect('/login');
 		} else {
-			console.log("Info from body-parser:" + request.body)
 	  	Comments.create({
 	      userUserId: user.user_id,
 				postPostId: request.body.post_id,
 	  		comment_body: request.body.body
 	  	})
 	    .then(generated_comment => {
-				console.log(generated_comment);
 	        response.redirect(`/post/${generated_comment.postPostId}`)
 	    })
 		}
@@ -278,8 +305,6 @@ app.get('/', function(req, res) {
 app.get('*', function(req, res) {
     res.redirect('/error');
 });
-
-
 
 //Sync the database
 sequelize.sync()
