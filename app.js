@@ -4,7 +4,9 @@ require('dotenv').config();
 const express = require('express');
 const session = require('express-session');
 const bodyparser = require('body-parser');
+const bcrypt = require('bcrypt');
 const Sequelize = require('sequelize');
+
 
 //start node express
 const app = express();
@@ -28,6 +30,7 @@ let urlencodedParser = bodyparser.urlencoded({ extended: true });
 const sequelize = new Sequelize(process.env.DB_NAME, process.env.DB_USER, null, {
   host: process.env.DB_HOST,
   dialect: 'postgres',
+	operatorsAliases: false,
   logging: false,
   define: {
     timestamps: false
@@ -81,8 +84,9 @@ app.post('/login', urlencodedParser, function (request, response) {
 		response.redirect('/?message=' + encodeURIComponent("Please fill out your password."));
 		return;
 	}
-	var email = request.body.email
-	var password = request.body.password
+
+	let email = request.body.email
+	let password = request.body.password
 
 	Users.findOne({
 		where: {
@@ -90,12 +94,16 @@ app.post('/login', urlencodedParser, function (request, response) {
 		}
 	})
 	.then(function (users) {
-		if (users !== null && password === users.password) {
-			request.session.user = users;
-			response.redirect('/posts');
-		} else {
-			response.redirect('/login');
-		}
+
+		bcrypt.compare(password, users.password).then(function(res) {
+			if (users !== null && res == true) {
+				request.session.user = users;
+				response.redirect('/posts');
+			} else {
+				response.redirect('/login');
+			}
+		});
+
 	})
 	.catch(function (error) {
 		console.error(error)
@@ -108,10 +116,13 @@ app.get('/login', function(request, response) {
 
 app.post('/register', urlencodedParser, function(request, response){
 
-	Users.create({
-		user_name: request.body.user_name,
-		email: request.body.email,
-		password: request.body.password
+	let password = request.body.password;
+	bcrypt.hash(password, 8).then(function(hash) {
+			Users.create({
+				user_name: request.body.user_name,
+				email: request.body.email,
+				password: hash
+			})
 	})
 	.then(generated_user => {
 			response.redirect('/login')
