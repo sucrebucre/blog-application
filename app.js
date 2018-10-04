@@ -8,7 +8,6 @@ const bcrypt = require('bcrypt');
 const alert = require('alert-node');
 const Sequelize = require('sequelize');
 
-
 //start node express
 const app = express();
 
@@ -187,26 +186,14 @@ app.get('/:user_name/posts', function(request, response) {
 	if (user === undefined) {
 	response.redirect('/login');
 	} else {
-	  Users.findOne({
-	    where: {
-	      user_name: request.params.user_name
-	    }
-	  })
-	  .then(function(result) {
-	    return result.dataValues.user_id;
-	  })
-	  .then(function(user_id) {
-
 	    Posts.findAll({
 	    	where: {
-	    		userUserId: user_id
+	    		userUserId: user.user_id
 	    	}
 	    })
 	    .then(function(result_by_id) {
 	      response.render('posts-specific-user', {data: result_by_id, user_info: user});
 	    })
-
-	  })
 	}
 });
 
@@ -216,28 +203,18 @@ app.get('/post/:post_id', function(request, response) {
 		if (user === undefined) {
 		response.redirect('/login');
 		} else {
-
-	    Posts.findOne({
-	      where: {
-	        post_id: request.params.post_id
-	      }
-	    })
-	    .then(function(result) {
-
-				Comments.findAll({
-		      where: {
-		        postPostId: request.params.post_id
-		      }
-		    })
-				.then(function(comment_info){
-					response.render('single-post', {data: result, comments: comment_info});
-				})
-
-	    })
+			Posts.findOne({
+				include: [Comments],
+				where: {
+					post_id: request.params.post_id
+				}
+			})
+			.then(function(result){
+				response.render('single-post', {data: result, comments: result.dataValues.comments});
+			})
 	    .catch(function(error) {
 	        response.render('single-post', {data: "This post id does not exist. Try another one!"});
 	    })
-
 		}
 });
 
